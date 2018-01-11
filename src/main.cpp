@@ -214,7 +214,7 @@ int main() {
   int lane = 1;
     
   // Have a reference velocity to target
-  double ref_vel = 49.5; // (MPH)
+  double ref_vel = 0; // (MPH)
 
   h.onMessage([&ref_vel,&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,&map_waypoints_dx,&map_waypoints_dy,&lane](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                      uWS::OpCode opCode) {
@@ -251,7 +251,7 @@ int main() {
           	double end_path_d = j[1]["end_path_d"];
 
           	// Sensor Fusion Data, a list of all other cars on the same side of the road.
-          	vector<vector<double>> sensor_fusion = j[1]["sensor_fusion"];
+            vector<vector<double>> sensor_fusion = j[1]["sensor_fusion"];
             
             
             
@@ -269,6 +269,7 @@ int main() {
                 // Car is in current lane
                 float d = sensor_fusion[i][6];
                 if (d < (2+4*lane+2) && d > (2+4*lane-2)) {
+                    // Check speed of car
                     double vx = sensor_fusion[i][3];
                     double vy = sensor_fusion[i][4];
                     double check_speed = sqrt(vx*vx + vy*vy);
@@ -278,12 +279,19 @@ int main() {
                     check_car_s += ((double)prev_size * 0.02 * check_speed);
                     
                     // Check values greater than Agent's and S Gap
-                    if ((check_car_s > car_s) && ((check_car_s = car_s) < 30)) {
+                    if ((check_car_s > car_s) && ((check_car_s - car_s) < 30)) {
                         
                         // Add logic to lower Reference vel so we don't crash into the car infront of us
                         // Also, flag to try to change lanes
-                        ref_vel = 29.5; // (MPH)
+                        //ref_vel = 29.5; // (MPH)
                         too_close = true;
+                        
+                        //Blindly turn left
+                        if (lane > 0) {
+                            lane = 0;
+                        } else if (lane == 0) { //Blindly turn right
+                            lane += 1;
+                        }
                     }
                 }
             }
