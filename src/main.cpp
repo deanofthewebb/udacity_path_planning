@@ -287,11 +287,11 @@ int main() {
                         too_close = true;
                         
                         //Blindly turn left
-                        if (lane > 0) {
+                        /*if (lane > 0) {
                             lane = 0;
                         } else if (lane == 0) { //Blindly turn right
-                            lane += 1;
-                        }
+                            lane += 1
+                        }*/
                     }
                 }
             }
